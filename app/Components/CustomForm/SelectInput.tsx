@@ -1,14 +1,17 @@
 import { Controller } from "react-hook-form";
 import CustomSelect from "../CustomSelect";
 import CustomLabel from "../CustomLabel";
+import React from "react";
 
 type PropsType = {
   pfield: any;
   control: any;
   errors: any;
+  handleChangeOption?: (id: string, options: string) => void;
 };
 export function SelectInput(props: PropsType) {
   const { pfield, control, errors } = props;
+
   return (
     <div className="flex flex-col">
       <CustomLabel

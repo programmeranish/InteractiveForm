@@ -1,7 +1,7 @@
-import React from "react";
+import React, { ReactNode } from "react";
 
 type PropsType = {
-  children: string;
+  children: ReactNode;
   required: boolean;
   htmlFor?: string;
   className?: string;

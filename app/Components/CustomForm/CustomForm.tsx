@@ -13,19 +13,20 @@ import { CustomFieldsType } from "../Dashboard";
 import { CustomTextInput } from "../CustomText";
 import { SelectInput } from "./SelectInput";
 import TextInput from "./TextInput";
+import { formDataToObject } from "@/lib/utils";
 
 type selectOptionType = {
   label: string;
   value: string;
 };
 
-type FieldsName = {
+type FieldsType = {
   id?: number;
   field_label: string;
   field_slug: string;
   field_type: string;
   required_field: string;
-  field_options?: selectOptionType[] | any | string; //string in multiple select the old one but we need object[] of label and value
+  field_options?: string; //string in multiple select the old one but we need object[] of label and value
   not_custom_fields?: boolean;
   disabled?: boolean;
 }[];
@@ -40,8 +41,8 @@ type customFieldsPair = {
 type PropsType = { dropedItems: CustomFieldsType[] };
 export default function CustomForm(props: PropsType) {
   const { dropedItems } = props;
-
-  const [pfields, setPfields] = useState<FieldsName>([]);
+  const [output, setOutput] = useState<string>("");
+  const [pfields, setPfields] = useState<FieldsType>([]);
 
   const useCustomFieldsDynamicSchema = (schema: any, config: any) => {
     const { field_slug, validationType, validations = [] } = config;
@@ -63,11 +64,45 @@ export default function CustomForm(props: PropsType) {
     return schema;
   };
 
+  const handlePfieldLabelChange = (field_slug: string, newLabel: string) => {
+    const newPfields = pfields.map((field) => {
+      if (field.field_slug === field_slug) {
+        field.field_label = newLabel;
+        field.field_slug = newLabel.trim().toLowerCase().replace(" ", "_");
+        return field;
+      }
+      return field;
+    });
+    setPfields(newPfields);
+  };
+  const handleSelectOptionsChange = (id, options) => {
+    const newPfields = pfields.map((field) => {
+      if (field.id === id) {
+        field.field_options = options;
+        return field;
+      }
+      return field;
+    });
+    setPfields(newPfields);
+  };
   const useCustomFieldsExtendValidation = (customFields: any) => {
     return customFields.map((customField: any) => {
       switch (customField.field_type) {
         case "text":
-          return customField;
+          if (Number(customField.required_field) === 1) {
+            return {
+              ...customField,
+              validationType: "string",
+              validations: [
+                {
+                  type: "required",
+                  params: ["This field is required"],
+                },
+              ],
+            };
+          } else {
+            return customField;
+          }
         case "select":
           if (Number(customField.required_field) === 1) {
             return {
@@ -112,7 +147,7 @@ export default function CustomForm(props: PropsType) {
     mode: "onTouched",
   });
 
-  const preFields: FieldsName = useMemo(
+  const preFields: FieldsType = useMemo(
     () => [
       {
         field_label: "Full Name",
@@ -134,9 +169,9 @@ export default function CustomForm(props: PropsType) {
         field_slug: item.field_slug,
         field_type: item.pfield_type,
         required_field: "1",
-        not_custom_fields: false,
+        not_custom_fields: true,
         disabled: false,
-        field_options: [],
+        field_options: "",
       });
     });
     setPfields(customFields);
@@ -178,88 +213,81 @@ export default function CustomForm(props: PropsType) {
         }
       }
     });
-
-    if (infos.length > 0) {
-      formdata.append("infos", JSON.stringify(infos));
-      data.infos = infos;
-    }
+    setOutput(JSON.stringify(formDataToObject(formdata)));
+    console.log("formdata", formdata);
+    fetch("https://jsjsjs.co", {
+      method: "POST",
+      body: formdata,
+    });
   };
 
   return (
     <div className="grid gap-2 w-full">
-      <div className="ouerLayer">
+      <div className=" rounded  shadow-lg">
         <div className="">
-          <div>
-            <div className="">
-              <div className=" rounded  shadow-lg">
-                <div className="">
-                  <form
-                    style={{
-                      height: "100%",
-                      width: "100%",
-                      padding: "4px",
-                    }}
-                    autoComplete="off"
-                    onSubmit={handleSubmit(onFormSubmit)}
-                  >
-                    {loading && (
-                      <div className="grid grid-cols-12 mt-5 min-h-[50%]">
-                        <div className="col-span-12 flex justify-center">
-                          Progressing
-                        </div>
-                      </div>
-                    )}
-                    {!loading && (
-                      <>
-                        <div className="grid gap-2 w-full">
-                          {pfields.length > 0 &&
-                            pfields.map((pfield, index) => {
-                              if (pfield.field_type === "text")
-                                return (
-                                  <div
-                                    className="grid  "
-                                    key={`grid-text-${index}`}
-                                  >
-                                    <TextInput
-                                      index={index}
-                                      pfield={pfield}
-                                      register={register}
-                                      errors={errors}
-                                    />
-                                  </div>
-                                );
-
-                              if (pfield.field_type === "select")
-                                return (
-                                  <div
-                                    className="grid  "
-                                    key={`grid-select-${index}`}
-                                  >
-                                    <SelectInput
-                                      pfield={pfield}
-                                      errors={errors}
-                                      control={control}
-                                    />
-                                  </div>
-                                );
-
-                              return null;
-                            })}
-                        </div>
-                        <div className="p-2 flex flex-end">
-                          <button className={"relative text-white"}>
-                            Save
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </form>
+          <form
+            style={{
+              height: "100%",
+              width: "100%",
+              padding: "4px",
+            }}
+            autoComplete="off"
+            noValidate
+            onSubmit={handleSubmit(onFormSubmit)}
+          >
+            {loading && (
+              <div className="grid grid-cols-12 mt-5 min-h-[50%]">
+                <div className="col-span-12 flex justify-center">
+                  Progressing
                 </div>
               </div>
-            </div>
-          </div>
+            )}
+            {!loading && (
+              <>
+                <div className="grid gap-2 w-full">
+                  {pfields.length > 0 &&
+                    pfields.map((pfield, index) => {
+                      if (pfield.field_type === "text")
+                        return (
+                          <div className="grid  " key={`grid-text-${index}`}>
+                            <TextInput
+                              index={index}
+                              pfield={pfield}
+                              register={register}
+                              errors={errors}
+                              handleChangeLabel={handlePfieldLabelChange}
+                            />
+                          </div>
+                        );
+
+                      if (pfield.field_type === "select")
+                        return (
+                          <div className="grid  " key={`grid-select-${index}`}>
+                            <SelectInput
+                              pfield={pfield}
+                              errors={errors}
+                              control={control}
+                              handleChangeOption={handleSelectOptionsChange}
+                            />
+                          </div>
+                        );
+
+                      return null;
+                    })}
+                </div>
+                <div className="p-2 flex flex-end">
+                  <button className={"relative text-white"}>Save</button>
+                </div>
+              </>
+            )}
+          </form>
         </div>
       </div>
+      {output && (
+        <div className="text-white">
+          <h4 className="text-white">{output}</h4>
+        </div>
+      )}
     </div>
   );
 }
