@@ -17,13 +17,13 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "baseUrl": ".",
+    "baseUrl": "src", // Changed to "src" to base paths from there
     "paths": {
+      "@/*": ["*"],
       "@/RadixComponents/*": ["RadixComponents/*"],
-      "@/components/*": ["components/*"],
+      "@/components/*": ["app/Components/*"], // Adjusted if Components are inside app
       "@/lib/*": ["lib/*"],
-      "@/store/*": ["store/*"],
-      "@/axios": ["axios"]
+      "@/store/*": ["store/*"]
     },
     "plugins": [
       {

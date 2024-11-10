@@ -1,4 +1,5 @@
 import { Droppable } from "react-beautiful-dnd";
+import CustomForm from "./CustomForm/CustomForm";
 // Destination List Component
 export default function DestinationList({ items }) {
   return (
@@ -15,20 +16,8 @@ export default function DestinationList({ items }) {
             minHeight: "150px",
           }}
         >
-          <h4>Destination List</h4>
-          {items.map((item) => (
-            <div
-              key={item.id}
-              style={{
-                padding: "8px",
-                margin: "4px 0",
-                backgroundColor: "#0F0F0F",
-                borderRadius: "4px",
-              }}
-            >
-              {item.content}
-            </div>
-          ))}
+          <h4 className="text-gray-400">Destination List</h4>
+          <CustomForm dropedItems={items} />
           {provided.placeholder}
         </div>
       )}

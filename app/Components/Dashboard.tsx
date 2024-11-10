@@ -4,19 +4,30 @@ import { DragDropContext } from "react-beautiful-dnd";
 import SourceList from "./SourceList";
 import DestinationList from "./DestinationList";
 
-type InitialItemsType = {
+export type CustomFieldsType = {
   id: string;
-  content: string;
   pfield_type: string;
+  field_label: string;
+  field_slug: string;
 };
-const initialItems: InitialItemsType[] = [
-  { id: "text-input", pfield_type: "text", content: "Text Input" },
-  { id: "select-input", pfield_type: "select", content: "Select Input" },
+const initialItems: CustomFieldsType[] = [
+  {
+    id: "text-input",
+    pfield_type: "text",
+    field_label: "Text Input",
+    field_slug: "text",
+  },
+  {
+    id: "select-input",
+    pfield_type: "select",
+    field_label: "Select Input",
+    field_slug: "select",
+  },
 ];
 
 function App() {
   const [sourceItems, setSourceItems] = useState(initialItems);
-  const [destinationItems, setDestinationItems] = useState<InitialItemsType[]>(
+  const [destinationItems, setDestinationItems] = useState<CustomFieldsType[]>(
     []
   );
 
@@ -37,7 +48,11 @@ function App() {
       // setSourceItems(newSourceItems);
       setDestinationItems([
         ...destinationItems,
-        { ...movedItem, id: `${movedItem.id}-${new Date().toString()}` },
+        {
+          ...movedItem,
+          id: `${movedItem.id}-${new Date().toString()}`,
+          field_slug: `${movedItem.field_slug}-${destinationItems.length}`,
+        },
       ]);
     }
   };

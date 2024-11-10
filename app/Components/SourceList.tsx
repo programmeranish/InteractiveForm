@@ -1,8 +1,12 @@
 import React, { useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { CustomFieldsType } from "./Dashboard";
 
 // Source List Component
-export default function SourceList({ items }) {
+type PropsType = {
+  items: CustomFieldsType[];
+};
+export default function SourceList({ items }: PropsType) {
   return (
     <Droppable droppableId="source">
       {(provided) => (
@@ -17,7 +21,8 @@ export default function SourceList({ items }) {
             marginBottom: "20px",
           }}
         >
-          <h4>Source List</h4>
+          <h4 className="text-gray-400">Drag the fields</h4>
+
           {items.map((item, index) => (
             <Draggable key={item.id} draggableId={item.id} index={index}>
               {(provided) => (
@@ -34,7 +39,7 @@ export default function SourceList({ items }) {
                     ...provided.draggableProps.style,
                   }}
                 >
-                  {item.content}
+                  {item.field_label}
                 </div>
               )}
             </Draggable>
